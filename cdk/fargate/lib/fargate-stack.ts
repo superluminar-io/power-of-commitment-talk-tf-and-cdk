@@ -17,7 +17,7 @@ export class FargateStack extends Stack {
         {
           cidrMask: 28,
           name: 'private',
-          subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         }
       ]
     });
@@ -32,7 +32,7 @@ export class FargateStack extends Stack {
     });
 
     const fargateContainer = taskDefinition.addContainer('exampleContainer', {
-      image: ecs.ContainerImage.fromRegistry('amazon/amazon-ecs-sample'),
+      image: ecs.ContainerImage.fromRegistry('yeasy/simple-web:latest'),
       memoryLimitMiB: 512,
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'ecs-fargate',
@@ -49,7 +49,7 @@ export class FargateStack extends Stack {
       desiredCount: 1,
       publicLoadBalancer: true,
       taskSubnets: {
-        subnets: [vpc.publicSubnets[0]]
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       listenerPort: 80,
     });
