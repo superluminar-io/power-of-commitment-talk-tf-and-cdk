@@ -31,19 +31,18 @@ export class FargateStack extends Stack {
       cpu: 256,
     });
 
-    const fargateContainer = taskDefinition.addContainer('exampleContainer', {
+    taskDefinition.addContainer('exampleContainer', {
       image: ecs.ContainerImage.fromRegistry('yeasy/simple-web:latest'),
       memoryLimitMiB: 512,
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'ecs-fargate',
       }),
+      portMappings: [{
+        containerPort: 80,
+      }]
     })
 
-    fargateContainer.addPortMappings({
-      containerPort: 80,
-    });
-
-    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, 'Service', {
+    new ecs_patterns.ApplicationLoadBalancedFargateService(this, 'Service', {
       cluster: cluster,
       taskDefinition: taskDefinition,
       desiredCount: 1,
@@ -52,6 +51,7 @@ export class FargateStack extends Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
       listenerPort: 80,
+      assignPublicIp: true,
     });
   }
 }
